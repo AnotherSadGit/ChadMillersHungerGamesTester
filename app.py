@@ -1,5 +1,7 @@
 from __future__ import division, print_function
 
+from datetime import datetime
+
 import arguments
 from Game import Game
 from bots import *
@@ -11,6 +13,8 @@ DEFAULT_VERBOSITY = True
 DEFAULT_MIN_ROUNDS = 300
 DEFAULT_AVERAGE_ROUNDS = 1000
 DEFAULT_END_EARLY = False
+DEFAULT_LOG_OUTPUT = True
+DEFAULT_LOG_FILE = "game_{0:%Y%m%d_%H%M%S}.txt".format(datetime.now())
 DEFAULT_PLAYERS = [Player(), Pushover(), Freeloader(), Alternator(), MaxRepHunter(), Random(.2), Random(.8)]
 
 # Bare minimum test game. See README.md for details.
