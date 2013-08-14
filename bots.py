@@ -3,7 +3,9 @@ import random
 
 class Pushover(BasePlayer):
     '''Player that always hunts.'''
-    def __init__(self):
+
+    def __init__(self, do_logging = False):
+        super(Pushover, self).__init__(do_logging)
         self.name = "Pushover"
     
     def hunt_choices(
@@ -20,7 +22,8 @@ class Pushover(BasePlayer):
 class Freeloader(BasePlayer):
     '''Player that always slacks.'''
     
-    def __init__(self):
+    def __init__(self, do_logging = False):
+        super(Freeloader, self).__init__(do_logging)
         self.name = "Freeloader"
     
     def hunt_choices(
@@ -36,7 +39,9 @@ class Freeloader(BasePlayer):
 
 class Alternator(BasePlayer):
     '''Player that alternates between hunting and slacking.'''
-    def __init__(self):
+
+    def __init__(self, do_logging = False):
+        super(Alternator, self).__init__(do_logging)
         self.name = "Alternator"
         self.last_played = 's'
         
@@ -57,7 +62,9 @@ class Alternator(BasePlayer):
 
 class MaxRepHunter(BasePlayer):
     '''Player that hunts only with people with max reputation.'''
-    def __init__(self):
+
+    def __init__(self, do_logging = False):
+        super(MaxRepHunter, self).__init__(do_logging)
         self.name = "MaxRepHunter"
 
     def hunt_choices(
@@ -78,7 +85,8 @@ class Random(BasePlayer):
     slacks with probability 1-p_hunt
     '''
     
-    def __init__(self, p_hunt):
+    def __init__(self, p_hunt, do_logging = False):
+        super(Random, self).__init__(do_logging)
         assert p_hunt >= 0.00 and p_hunt <= 1.00, "p_hunt must be at least 0 and at most 1"
         self.name = "Random" + str(p_hunt)
         self.p_hunt = p_hunt
@@ -95,7 +103,9 @@ class Random(BasePlayer):
 
 class FairHunter(BasePlayer):
     '''Player that tries to be fair by hunting with same probability as each opponent'''
-    def __init__(self):
+
+    def __init__(self, do_logging = False):
+        super(FairHunter, self).__init__(do_logging)
         self.name = "FairHunter"
 
     def hunt_choices(
@@ -110,7 +120,9 @@ class FairHunter(BasePlayer):
         
 class BoundedHunter(BasePlayer):
     '''Player that hunts whenever the other's reputation is within some range.'''
-    def __init__(self,lower,upper):
+
+    def __init__(self, lower, upper, do_logging = False):
+        super(BoundedHunter, self).__init__(do_logging)
         self.name = "BoundedHunter" + str(lower)+'-'+str(upper)
         self.low = lower
         self.up = upper
@@ -128,7 +140,8 @@ class BoundedHunter(BasePlayer):
 class AverageHunter(BasePlayer):
     '''Player that tries to maintain the average reputation, but spreads its hunts randomly.'''
     
-    def __init__(self):
+    def __init__(self, do_logging = False):
+        super(AverageHunter, self).__init__(do_logging)
         self.name = "AverageHunter"
 
     def hunt_choices(

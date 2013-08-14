@@ -32,6 +32,8 @@ class GamePlayer(object):
         self.player = player
         self.food = food
         self.hunts = hunts
+        self.do_logging = player.do_logging
+        self.prev_rep = 0
         
     @property
     def rep(self):
@@ -92,8 +94,10 @@ class Game(object):
 
         if self.verbose:
             print("Game parameters:\n # players: %d\n verbose: %s\n " \
+                  "start_food: %d\n " \
                   "min_rounds: %d\n average_rounds: %d\n " \
-                  "end_early: %s\n" % (len(players), verbose, \
+                  "end_early: %s\n" % (len(players), verbose, 
+                                       start_food, 
                                        min_rounds, average_rounds,
                                        end_early))
 
@@ -117,6 +121,31 @@ class Game(object):
     def calculate_m(self):
             return random.randrange(1, self.P*(self.P-1))
 
+    def log_players_round_details(self, round_info):
+        # For players whose details are to be logged, log details of each contest 
+        # they took part in during a round.
+        # round_info: list of tuples, where each tuple represents a different player:
+        #   (choice_pairs, player_results, GamePlayer)
+        players_to_log = [player_info for player_info in round_info if player_info[2].do_logging]
+        players_to_log.sort(key = lambda player_info: player_info[2].player.name)
+        for player_info in players_to_log:
+            opposing_players = [opposing_info[2] for opposing_info in round_info 
+                                if opposing_info <> player_info]
+            player_contests_choice_pairs = player_info[0]
+            player_results = player_info[1]
+            p = player_info[2]
+            
+            outcomes = zip(opposing_players, player_contests_choice_pairs, player_results)            
+            outcomes.sort(key = lambda outcome: outcome[0].player.name)
+            print ("")
+            print ("Details of round for player {0} (rep at start of round: {1:.3f}): ".format(
+                                                                            p.player.name, 
+                                                                            p.prev_rep))
+            for outcome in outcomes:
+                # Left align the player name and pad to 30 characters wide with trailing spaces.
+                print ("    vs {0: <30} (rep at start of round: {1:.3f}): {2}  Food earned: {3}"
+                       .format(outcome[0].player.name, outcome[0].prev_rep, 
+                               outcome[1], outcome[2]))
             
         
     def play_round(self):
@@ -137,18 +166,25 @@ class Game(object):
         strategies = []
         for i,p in enumerate(self.players):
             opp_reputations = reputations[:i]+reputations[i+1:]
+            # Save the player's rep from the previous round.
+            p.prev_rep = p.rep
             strategy = p.player.hunt_choices(self.round, p.food, p.rep, m, opp_reputations)
 
+            # Insert a dummy choice for the player playing themselves.  Makes it 
+            # easier to pair up this player's choice against another player with 
+            # that player's choice against this one.
             strategy.insert(i,'s')
             strategies.append(strategy)
 
         # Perform the hunts
         self.hunt_opportunities += self.P-1
 
+        choice_pairs = [[] for j in range(self.P)]
         results = [[] for j in range(self.P)]
         for i in range(self.P):
             for j in range(self.P):
                 if i!=j:
+                    choice_pairs[i].append((strategies[i][j], strategies[j][i]))
                     results[i].append(payout(strategies[i][j], strategies[j][i]))
                 
         total_hunts = sum(s.count('h') for s in strategies)
@@ -164,7 +200,8 @@ class Game(object):
             bonus = 0
         
         # Award food and let players run cleanup tasks
-        for strat, result, player in zip(strategies, results, self.players):
+        round_info = zip(strategies, results, self.players)
+        for strat, result, player in round_info:
             food = sum(result)
             hunts = strat.count('h')
             
@@ -175,10 +212,18 @@ class Game(object):
             
     
         if self.verbose:
-            newlist = sorted(self.players, key=lambda x: x.food, reverse=True)
-            for p in newlist:
-                print (p, file = self.output_stream)
-                   
+            round_info_logged = zip(choice_pairs, results, self.players)
+            self.log_players_round_details(round_info_logged)
+
+            heading = "Results of round for players:"
+            print ("")
+            print (heading)
+            print (len(heading) * "-")
+            newlist = sorted(round_info, key=lambda player_info: player_info[2].food, reverse=True)
+            for player_info in newlist:
+                p = player_info[2]
+                print (p)
+                                        
         
         if self.game_over():
             print ("")

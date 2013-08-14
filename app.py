@@ -15,7 +15,9 @@ DEFAULT_AVERAGE_ROUNDS = 1000
 DEFAULT_END_EARLY = False
 # Set log file to None to divert output to stdout.
 DEFAULT_LOG_FILE = "game_{0:%Y%m%d_%H%M%S}.txt".format(datetime.now())
-DEFAULT_PLAYERS = [Player(), Pushover(), Freeloader(), Alternator(), MaxRepHunter(), Random(.2), Random(.8)]
+DEFAULT_PLAYERS = [Player(), Pushover(), Freeloader(), Alternator(), 
+                   MaxRepHunter(), FairHunter(), AverageHunter(), 
+                   Random(.2), Random(.8), BoundedHunter(0.7, 1.0)]
 
 # Bare minimum test game. See README.md for details.
 

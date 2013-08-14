@@ -15,7 +15,9 @@ class BasePlayer(object):
     Base class so I don't have to repeat bookkeeping stuff.
     Do not edit unless you're working on the simulation.
     '''
-    
+    def __init__(self, do_logging = False):
+        self.do_logging = do_logging
+
     def __str__(self):
         try:
             return self.name
@@ -38,6 +40,10 @@ class Player(BasePlayer):
     Your strategy starts here.
     '''
     
+    def __init__(self, do_logging = False):
+        super(Player, self).__init__(do_logging)
+        self.name = "Nasty"
+
     def hunt_choices(
                     self,
                     round_number,
