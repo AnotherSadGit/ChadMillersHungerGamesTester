@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 from app import DEFAULT_VERBOSITY, DEFAULT_MIN_ROUNDS, \
     DEFAULT_AVERAGE_ROUNDS, DEFAULT_END_EARLY, DEFAULT_PLAYERS, \
-    DEFAULT_LOG_OUTPUT, DEFAULT_LOG_FILE
+    DEFAULT_LOG_FILE
 from bots import *
 from Player import Player
 
@@ -51,10 +51,7 @@ def get_arguments():
     game_options.add_argument("-e", "--end-early", dest="end_early",
                         default=DEFAULT_END_EARLY, action="store_true",
                         help="end the game if 'Player' is eliminated")
-    game_options.add_argument("-log", "--log-to-file", dest="log_to_file",
-                        default=DEFAULT_LOG_OUTPUT, action="store_true",
-                        help="write output to a log file")
-    game_options.add_argument("-fn", "--log-filename", dest="log_filename",
+    game_options.add_argument("-lf", "--log-filename", dest="log_filename",
                         default=DEFAULT_LOG_FILE, 
                         help="name of output file")
     args = parser.parse_args()
@@ -63,7 +60,6 @@ def get_arguments():
         "min_rounds": args.min_rounds,
         "average_rounds": args.average_rounds,
         "end_early": args.end_early,
-        "log_to_file": args.log_to_file,
         "log_filename": args.log_filename
     }
     bots = []

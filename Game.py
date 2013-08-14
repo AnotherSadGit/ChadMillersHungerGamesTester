@@ -67,40 +67,44 @@ class Game(object):
     See app.py for a bare-minimum test game.
     '''   
     def __init__(self, players, verbose=True, min_rounds=300, average_rounds=1000, end_early=False, 
-                 log_to_file=False, log_filename=None):
+                 log_filename=None):
         self.verbose = verbose
         assert average_rounds > min_rounds, "average_rounds must be greater than min_rounds"
         self.max_rounds = min_rounds + int(random.expovariate(1/(average_rounds-min_rounds)))
         self.round = 0
         self.hunt_opportunities = 0
         self.end_early = end_early
+        self.log_filename = log_filename
+        self.log_file = None
+        self.orig_stdout = None
         
         start_food = 300*(len(players)-1)
         
         self.players = [GamePlayer(self,p,start_food) for p in players]
 
-        self.output_to_file = log_to_file
-        self.output_stream = sys.stdout
-        if self.output_to_file:
+        if log_filename is not None:
+            self.orig_stdout = sys.stdout
             # Open as file object rather than opening it via io.open as a text 
             # stream: A file object takes strings while a text stream takes 
             # unicode.  Unicode causes a problem when writing players' details.
-            self.output_stream = open(log_filename, "wt")
+            self.log_file = open(log_filename, "wt")
+            sys.stdout = self.log_file
 
         if self.verbose:
             print("Game parameters:\n # players: %d\n verbose: %s\n " \
                   "min_rounds: %d\n average_rounds: %d\n " \
                   "end_early: %s\n" % (len(players), verbose, \
                                        min_rounds, average_rounds,
-                                       end_early), file = self.output_stream)
+                                       end_early))
 
     def __del__(self):
-        if self.output_to_file:
+        if self.log_filename is not None:
             try:
-                self.output_stream.flush()
-                os.fsync(self.output_stream.fileno())
+                sys.stdout.flush()
+                os.fsync(sys.stdout.fileno())
             finally:
-                self.output_stream.close()     
+                sys.stdout.close() 
+                sys.stdout = self.orig_stdout   
 
     @property
     def m_bonus(self):
@@ -112,14 +116,17 @@ class Game(object):
         
     def calculate_m(self):
             return random.randrange(1, self.P*(self.P-1))
+
             
         
     def play_round(self):
         # Get beginning of round stats        
         self.round += 1
         if(self.verbose):
-            print ("\nBegin Round " + str(self.round) + ":",
-                   file = self.output_stream)
+            print ("")
+            print("-" * 80)
+            print ("Begin Round " + str(self.round) + ":")
+            print("-" * 80)
         m = self.calculate_m()
         
         # Beginning of round setup
@@ -147,14 +154,12 @@ class Game(object):
         total_hunts = sum(s.count('h') for s in strategies)
         
         if (self.verbose):
-            print ("There were {} hunts of {} needed for bonus".format(total_hunts, m),
-                    file = self.output_stream)
+            print ("There were {} hunts of {} needed for bonus".format(total_hunts, m))
 
         if total_hunts >= m:
             bonus = self.m_bonus
             if (self.verbose):
-                print("Cooperation Threshold Achieved. Bonus of {} awarded to each player".format(self.m_bonus),
-                      file = self.output_stream)
+                print("Cooperation Threshold Achieved. Bonus of {} awarded to each player".format(self.m_bonus))
         else:
             bonus = 0
         
@@ -176,11 +181,8 @@ class Game(object):
                    
         
         if self.game_over():
-            print ("", file = self.output_stream)
-            print ("Game Completed after {} rounds".format(self.round),
-                   file = self.output_stream)
-            if self.output_to_file:
-                print ("Game Completed after {} rounds".format(self.round))
+            print ("")
+            print ("Game Completed after {} rounds".format(self.round))
             raise StopIteration            
         
     def game_over(self):        
@@ -188,8 +190,7 @@ class Game(object):
         quit = False
 
         for p in starved:
-            print ("{} has starved and been eliminated in round {}".format(p.player, self.round),
-                   file = self.output_stream)
+            print ("{} has starved and been eliminated in round {}".format(p.player, self.round))
 
             if isinstance(p.player, Player) and self.end_early:
                 quit = True
@@ -204,7 +205,7 @@ class Game(object):
         Preferred way to run the game to completion
         Written this way so that I can step through rounds one at a time
         '''
-        print ("Playing the game to the end:", file = self.output_stream)
+        print ("Playing the game to the end:")
 
         while True:
             try:
@@ -212,26 +213,25 @@ class Game(object):
             except StopIteration:
 
                 if len(self.players) <= 0:
-                    print ("Everyone starved", file = self.output_stream)
+                    print ("Everyone starved")
                 elif (len(self.players) == 1):
-                    print ("The winner is: ", self.players[0].player,
-                           file = self.output_stream)
+                    print ("The winner is: ", self.players[0].player)
                 else:
                     survivors = sorted(self.players, key=lambda player: player.food, reverse=True)
-                    print ("The winner is: ", survivors[0].player,
-                           file = self.output_stream)
-                    print ("Multiple survivors:",
-                           file = self.output_stream)
-                    print (survivors, file = self.output_stream)
+                    print ("The winner is: ", survivors[0].player)
+                    print ("Multiple survivors:")
+                    print (survivors)
 
-                if self.output_to_file:
+                if self.log_filename is not None:
                     try:
                         # Ensure the output buffer is flushed and written to 
                         # disk before finishing up, otherwise may miss the 
                         # details of the last few rounds.
-                        self.output_stream.flush()
-                        os.fsync(self.output_stream.fileno())
+                        sys.stdout.flush()
+                        os.fsync(sys.stdout.fileno())
                     finally:
-                        self.output_stream.close()
+                        sys.stdout.close()
+                        sys.stdout = self.orig_stdout
+                        print ("Game completed.  See log file for details.")
                 break
         
