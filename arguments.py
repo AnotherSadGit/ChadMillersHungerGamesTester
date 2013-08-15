@@ -1,7 +1,7 @@
 from __future__ import division, print_function
 from argparse import ArgumentParser
 
-from app import DEFAULT_VERBOSITY, DEFAULT_MIN_ROUNDS, \
+from defaults import DEFAULT_VERBOSITY, DEFAULT_MIN_ROUNDS, \
     DEFAULT_AVERAGE_ROUNDS, DEFAULT_END_EARLY, DEFAULT_PLAYERS, \
     DEFAULT_LOG_FILE
 from bots import *
