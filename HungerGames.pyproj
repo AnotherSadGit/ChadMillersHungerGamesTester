@@ -25,6 +25,7 @@
     <Compile Include="app.py" />
     <Compile Include="arguments.py" />
     <Compile Include="bots.py" />
+    <Compile Include="defaults.py" />
     <Compile Include="Game.py" />
     <Compile Include="Player.py" />
     <Compile Include="tester.py" />

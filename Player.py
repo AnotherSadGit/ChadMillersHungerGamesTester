@@ -21,7 +21,7 @@ class BasePlayer(object):
 
     def __str__(self):
         try:
-            if id:
+            if self.id:
                 return "{0}[{1}]".format(self.name, self.id)
             else:
                 return self.name
