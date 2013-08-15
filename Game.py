@@ -127,7 +127,7 @@ class Game(object):
         # round_info: list of tuples, where each tuple represents a different player:
         #   (choice_pairs, player_results, GamePlayer)
         players_to_log = [player_info for player_info in round_info if player_info[2].do_logging]
-        players_to_log.sort(key = lambda player_info: player_info[2].player.name)
+        players_to_log.sort(key = lambda player_info: player_info[2].player.sort_order)
         for player_info in players_to_log:
             opposing_players = [opposing_info[2] for opposing_info in round_info 
                                 if opposing_info <> player_info]
@@ -136,15 +136,15 @@ class Game(object):
             p = player_info[2]
             
             outcomes = zip(opposing_players, player_contests_choice_pairs, player_results)            
-            outcomes.sort(key = lambda outcome: outcome[0].player.name)
+            outcomes.sort(key = lambda outcome: outcome[0].player.sort_order)
             print ("")
             print ("Details of round for player {0} (rep at start of round: {1:.3f}): ".format(
-                                                                            p.player.name, 
+                                                                            p.player, 
                                                                             p.prev_rep))
             for outcome in outcomes:
                 # Left align the player name and pad to 30 characters wide with trailing spaces.
                 print ("    vs {0: <30} (rep at start of round: {1:.3f}): {2}  Food earned: {3}"
-                       .format(outcome[0].player.name, outcome[0].prev_rep, 
+                       .format(outcome[0].player, outcome[0].prev_rep, 
                                outcome[1], outcome[2]))
             
         
@@ -219,7 +219,11 @@ class Game(object):
             print ("")
             print (heading)
             print (len(heading) * "-")
-            newlist = sorted(round_info, key=lambda player_info: player_info[2].food, reverse=True)
+            # Since Python 2.2 sorting has been stable.  Can take advantage of 
+            # this to sort by two columns: First by food descending, then by 
+            # player sort order (name followed by id) ascending.
+            newlist = sorted(round_info, key=lambda player_info: player_info[2].player.sort_order)
+            newlist.sort(key=lambda player_info: player_info[2].food, reverse=True)
             for player_info in newlist:
                 p = player_info[2]
                 print (p)

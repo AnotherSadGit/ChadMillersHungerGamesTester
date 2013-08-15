@@ -15,16 +15,30 @@ class BasePlayer(object):
     Base class so I don't have to repeat bookkeeping stuff.
     Do not edit unless you're working on the simulation.
     '''
-    def __init__(self, do_logging = False):
+    def __init__(self, id = None, do_logging = False):
         self.do_logging = do_logging
+        self.id = id
 
     def __str__(self):
         try:
-            return self.name
+            if self.id is not None:
+                return "{0}[{1}]".format(self.name, self.id)
+            else:
+                return self.name
         except AttributeError:
             # Fall back on Python default
             return super(BasePlayer, self).__repr__()
     
+    @property
+    def sort_order(self):
+        sort_order = ""
+        try:
+            sort_order += self.name
+        finally:
+            if self.id is not None:
+                sort_order += "{0:05}".format(self.id)
+        return sort_order
+
     def hunt_choices(*args, **kwargs):
         raise NotImplementedError("You must define a strategy!")
         
@@ -40,8 +54,8 @@ class Player(BasePlayer):
     Your strategy starts here.
     '''
     
-    def __init__(self, do_logging = False):
-        super(Player, self).__init__(do_logging)
+    def __init__(self, id = None, do_logging = False):
+        super(Player, self).__init__(id, do_logging)
         self.name = "Nasty"
 
     def hunt_choices(
