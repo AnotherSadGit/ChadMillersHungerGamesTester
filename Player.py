@@ -21,7 +21,7 @@ class BasePlayer(object):
 
     def __str__(self):
         try:
-            if self.id:
+            if self.id is not None:
                 return "{0}[{1}]".format(self.name, self.id)
             else:
                 return self.name
@@ -29,6 +29,16 @@ class BasePlayer(object):
             # Fall back on Python default
             return super(BasePlayer, self).__repr__()
     
+    @property
+    def sort_order(self):
+        sort_order = ""
+        try:
+            sort_order += self.name
+        finally:
+            if self.id is not None:
+                sort_order += "{0:05}".format(self.id)
+        return sort_order
+
     def hunt_choices(*args, **kwargs):
         raise NotImplementedError("You must define a strategy!")
         

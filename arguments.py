@@ -13,7 +13,12 @@ def add_player_group(player_list, player_class, argument_values):
         number = int(number)
         do_log = int(do_log)
         
-        player_list.extend([player_class(i, do_log) for i in range(number)])
+        if number <= 0:
+            return
+        elif number == 1:
+            player_list.append(player_class(None, do_log))
+        else:
+            player_list.extend([player_class(i, do_log) for i in range(number)])
 
 def get_arguments():
     '''
@@ -98,14 +103,18 @@ def get_arguments():
     add_player_group(bots, Player, args.player) 
 
     for x in args.random:
-        (number, p_hunt) = x.split(",")
+        (number, p_hunt, do_log) = x.split(",")
         number = int(number)
         p_hunt = float(p_hunt)
         do_log = int(do_log)
         
-        bots.extend([Random(p_hunt, i, do_log) for i in range(number)])
-
-
+        if number <= 0:
+            continue
+        elif number == 1:
+            bots.append(Random(p_hunt, None, do_log))
+        else:
+            bots.extend([Random(p_hunt, i, do_log) for i in range(number)])
+        
     players = bots if bots else DEFAULT_PLAYERS       
         
     return (players, options)
