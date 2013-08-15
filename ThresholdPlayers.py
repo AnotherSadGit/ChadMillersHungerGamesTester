@@ -129,6 +129,7 @@ class FixedThreshold(ThresholdPlayer):
         first_hunt_function = super(FixedThreshold,
                                     self)._first_hunt_fixed_value(first_hunt_value)
         test_value = "reputation"
+        bias = 0
         super(FixedThreshold, self).__init__(first_hunt_function, 
-                                             threshold, test_value, 
+                                             threshold, test_value, bias, 
                                              id, do_logging)

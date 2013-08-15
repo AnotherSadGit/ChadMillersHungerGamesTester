@@ -18,6 +18,6 @@ DEFAULT_LOG_FILE = "game_{0:%Y%m%d_%H%M%S}.txt".format(datetime.now())
 DEFAULT_PLAYERS = [Player(), Pushover(), Freeloader(), Alternator(), 
                    MaxRepHunter(), FairHunter(), AverageHunter(), 
                    Random(.2), Random(.8), BoundedHunter(0.7, 1.0), 
-                   FixedThreshold(0.5, 'h', True), FixedThreshold(0.5, 's'), 
+                   FixedThreshold(0.5, 'h'), FixedThreshold(0.5, 's'), 
                    FixedThreshold(0.45, 'h'), FixedThreshold(0.45, 's'), 
-                   FixedThreshold(0.55, 'h', True), FixedThreshold(0.55, 's')]
+                   FixedThreshold(0.55, 'h'), FixedThreshold(0.55, 's')]
