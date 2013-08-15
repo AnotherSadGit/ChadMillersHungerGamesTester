@@ -6,6 +6,7 @@ from defaults import DEFAULT_VERBOSITY, DEFAULT_MIN_ROUNDS, \
     DEFAULT_LOG_FILE
 from bots import *
 from Player import Player
+from ThresholdPlayers import FixedThreshold
 
 def add_player_group(player_list, player_class, argument_values):
     for x in argument_values:
@@ -55,12 +56,18 @@ def get_arguments():
                             "with, and whether they require detailed " \
                             "logging or not, in the form 'number,do_log' " \
                             "where number is an int and do_log is 0 or 1")
-    bot_options.add_argument("-fh", "--fair-h    bot_options.add_argument("-fh", "--fair-hunter", dest="fairhunter",
-                        default=0, type=int,
-                        help="the number of FairHunter bots to play with")
+    bot_options.add_argument("-fh", "--fair-hunter", dest="fairhunter",
+                        default=[], nargs="*",
+                        help="the number of FairHunter bots to play " \
+                            "with, and whether they require detailed " \
+                            "logging or not, in the form 'number,do_log' " \
+                            "where number is an int and do_log is 0 or 1")
     bot_options.add_argument("-ah", "--avg-hunter", dest="averagehunter",
-                        default=0, type=int,
-                        help="the number of AverageHunter bots to play with")
+                        default=[], nargs="*",
+                        help="the number of AverageHunter bots to play " \
+                            "with, and whether they require detailed " \
+                            "logging or not, in the form 'number,do_log' " \
+                            "where number is an int and do_log is 0 or 1")
     bot_options.add_argument("-pl", "--player", dest="player",
                         default=[], nargs="*",
                         help="the number of Player bots to play " \
@@ -68,28 +75,30 @@ def get_arguments():
                             "logging or not, in the form 'number,do_log' " \
                             "where number is an int and do_log is 0 or 1")
     bot_options.add_argument("-r", "--random", dest="random",
-                        default=[], nargs="*",mber,p_hunt "with, and whether they require detailed " \
+                        default=[], nargs="*",
+                        help="the number and probability of Random bots to play " \
+                            "with, and whether they require detailed " \
                             "logging or not, in the form  " \
                             "'number,p_hunt,do_log' where number is an int, " \
                             "p_hunt is a float in the range 0-1, and " \
-                            "do_log is 0 or 1")' such that number " \
-                        "is an int, and p_hunt is a float from 0-1)")
+                            "do_log is 0 or 1")
     bot_options.add_argument("-bh", "--bounded-hunter", dest="boundedhunter",
                         default=[], nargs="*",
-                        help="the number and values of BoundedHunter bots to play " \
-                        "with (in the form 'number,lower,upper' such that number " \
-                        "is an int, and lower & upper are floats from 0-1)")
+                        help="the number and limits of BoundedHunter bots to play " \
+                            "with, and whether they require detailed " \
+                            "logging or not, in the form  " \
+                            "'number,lower,upper,do_log' where number is an int, " \
+                            "lower and upper are floats in the range 0-1, and " \
+                            "do_log is 0 or 1")
     bot_options.add_argument("-fth", "--fixed-threshold", dest="fixedthreshold",
                         default=[], nargs="*",
                         help="the number, threshold and first value of " \
-                        "Fixed Threshold bots to play with (in the form " \
-                        "'number,threshold,first_hunt_value' " \
-                        "such that number is anint, thre an int, " \
-                            "p_hunt is a float in the range 0-1, and " \
-                            "do_log is 0 or 1")
-
-                            "p_hunt is a float in the range 0-1, and " \
-                            "do_log is 0 or 1")
+                            "FixedThreshold bots to play with, and whether " \
+                            "they require detailed logging or not, in the form  " \
+                            "'number,threshold,first_hunt_value,do_log' " \
+                            "where number is an int, threshold is a float " \
+                            "in the range 0-1, first_hunt_value is 'h' or 's' " \
+                            "and do_log is 0 or 1")
 
     game_options= parser.add_argument_group("game options")
     game_options.add_argument("-q", "--quiet", dest="verbose",
@@ -111,21 +120,26 @@ def get_arguments():
     args = parser.parse_args()
 
     options = {
-        "verbose": not a    add_player_group(bots, Pushover, args.pushover) 
-    add_player_group(bots, Freeloader, args.freeloader) 
-    add_player_group(bots, Alternator, args.alternator) 
-    add_player_group(bots, MaxRepHunter, args.mrp) 
-    add_player_group(bots, Player, args.player)       "end_early": args.end_early,
+        "verbose": not args.verbose,
+        "min_rounds": args.min_rounds,
+        "average_rounds": args.average_rounds,
+        "end_early": args.end_early,
         "log_filename": args.log_filename
     }
+
+    bots = []
+    
     add_player_group(bots, Pushover, args.pushover) 
     add_player_group(bots, Freeloader, args.freeloader) 
     add_player_group(bots, Alternator, args.alternator) 
     add_player_group(bots, MaxRepHunter, args.mrp) 
+    add_player_group(bots, FairHunter, args.fairhunter) 
+    add_player_group(bots, AverageHunter, args.averagehunter) 
     add_player_group(bots, Player, args.player) 
 
     for x in args.random:
-         int(number)
+        (number, p_hunt, do_log) = x.split(",")
+        number = int(number)
         p_hunt = float(p_hunt)
         do_log = int(do_log)
         
@@ -135,6 +149,33 @@ def get_arguments():
             bots.append(Random(p_hunt, None, do_log))
         else:
             bots.extend([Random(p_hunt, i, do_log) for i in range(number)])
+
+    for x in args.boundedhunter:
+        (number, lower, upper, do_log) = x.split(",")
+        number = int(number)
+        lower = float(lower)
+        upper = float(upper)
+        do_log = int(do_log)
+        
+        if number <= 0:
+            continue
+        elif number == 1:
+            bots.append(BoundedHunter(lower, upper, None, do_log))
+        else:
+            bots.extend([BoundedHunter(lower, upper, i, do_log) for i in range(number)])
+
+    for x in args.fixedthreshold:
+        (number, threshold, first_hunt_value, do_log) = x.split(",")
+        number = int(number)
+        threshold = float(threshold)
+        do_log = int(do_log)
+        
+        if number <= 0:
+            continue
+        elif number == 1:
+            bots.append(FixedThreshold(threshold, first_hunt_value, None, do_log))
+        else:
+            bots.extend([FixedThreshold(threshold, first_hunt_value, i, do_log) for i in range(number)])
         
     players = bots if bots else DEFAULT_PLAYERS       
         

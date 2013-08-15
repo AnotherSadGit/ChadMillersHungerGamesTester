@@ -29,6 +29,7 @@
     <Compile Include="Game.py" />
     <Compile Include="Player.py" />
     <Compile Include="tester.py" />
+    <Compile Include="ThresholdPlayers.py" />
     <Compile Include="unittests.py" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />

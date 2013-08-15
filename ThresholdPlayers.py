@@ -7,8 +7,9 @@ class ThresholdPlayer(BasePlayer):
     it.
     '''
 
-    def __init__(self, first_hunt_function, threshold, test_value, bias = 0, do_logging = False):
-        super(ThresholdPlayer, self).__init__(do_logging)
+    def __init__(self, first_hunt_function, threshold, test_value, 
+                 bias = 0, id = None, do_logging = False):
+        super(ThresholdPlayer, self).__init__(id, do_logging)
         '''Sets up the parameters that define how the player will hunt during 
         the game.
 
@@ -123,11 +124,11 @@ class FixedThreshold(ThresholdPlayer):
     threshold or 's' if it's below it.
     '''
 
-    def __init__(self, threshold, first_hunt_value, do_logging = False):
+    def __init__(self, threshold, first_hunt_value, id = None, do_logging = False):
         self.name = "FixedThreshold" + str(threshold) + first_hunt_value
         first_hunt_function = super(FixedThreshold,
                                     self)._first_hunt_fixed_value(first_hunt_value)
         test_value = "reputation"
         super(FixedThreshold, self).__init__(first_hunt_function, 
                                              threshold, test_value, 
-                                             do_logging = do_logging)
+                                             id, do_logging)
