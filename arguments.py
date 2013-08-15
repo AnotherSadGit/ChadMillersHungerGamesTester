@@ -7,6 +7,13 @@ from defaults import DEFAULT_VERBOSITY, DEFAULT_MIN_ROUNDS, \
 from bots import *
 from Player import Player
 
+def add_player_group(player_list, player_class, argument_values):
+    for x in argument_values:
+        (number, do_log) = x.split(",")
+        number = int(number)
+        do_log = int(do_log)
+        
+        player_list.extend([player_class(i, do_log) for i in range(number)])
 
 def get_arguments():
     '''
@@ -17,27 +24,47 @@ def get_arguments():
     For help, run `python app.py -h` or `python app.py --help`
     '''
     parser = ArgumentParser()
+
     bot_options = parser.add_argument_group("bots to use for game")    
     bot_options.add_argument("-p", "--pushover", dest="pushover",
-                        default=0, type=int,
-                        help="the number of Pushover bots to play with")
+                        default=[], nargs="*",
+                        help="the number of Pushover bots to play " \
+                            "with, and whether they require detailed " \
+                            "logging or not, in the form 'number,do_log' " \
+                            "where number is an int and do_log is 0 or 1")
     bot_options.add_argument("-f", "--freeloader", dest="freeloader",
-                        default=0, type=int,
-                        help="the number of Freeloader bots to play with")
+                        default=[], nargs="*",
+                        help="the number of Freeloader bots to play " \
+                            "with, and whether they require detailed " \
+                            "logging or not, in the form 'number,do_log' " \
+                            "where number is an int and do_log is 0 or 1")
     bot_options.add_argument("-a", "--alternator", dest="alternator",
-                        default=0, type=int,
-                        help="the number of Alternator bots to play with")
+                        default=[], nargs="*",
+                        help="the number of Alternator bots to play " \
+                            "with, and whether they require detailed " \
+                            "logging or not, in the form 'number,do_log' " \
+                            "where number is an int and do_log is 0 or 1")
     bot_options.add_argument("-m", "--max-rep-hunter", dest="mrp",
-                        default=0, type=int,
-                        help="the number of MaxRepHunter bots to play with")
+                        default=[], nargs="*",
+                        help="the number of MaxRepHunter bots to play " \
+                            "with, and whether they require detailed " \
+                            "logging or not, in the form 'number,do_log' " \
+                            "where number is an int and do_log is 0 or 1")
     bot_options.add_argument("-pl", "--player", dest="player",
-                        default=0, type=int,
-                        help="number of Player bots as defined in Player.py")
+                        default=[], nargs="*",
+                        help="the number of Player bots to play " \
+                            "with, and whether they require detailed " \
+                            "logging or not, in the form 'number,do_log' " \
+                            "where number is an int and do_log is 0 or 1")
     bot_options.add_argument("-r", "--random", dest="random",
                         default=[], nargs="*",
                         help="the number and value of Random bots to play " \
-                        "with (in the form 'number,p_hunt' such that number " \
-                        "is an int, and p_hunt is a float from 0-1)")
+                            "with, and whether they require detailed " \
+                            "logging or not, in the form  " \
+                            "'number,p_hunt,do_log' where number is an int, " \
+                            "p_hunt is a float in the range 0-1, and " \
+                            "do_log is 0 or 1")
+
     game_options= parser.add_argument_group("game options")
     game_options.add_argument("-q", "--quiet", dest="verbose",
                         default=not DEFAULT_VERBOSITY, action="store_false",
@@ -64,21 +91,19 @@ def get_arguments():
     }
     bots = []
     
-    bots.extend(
-        [Pushover() for _ in range(args.pushover)] +
-        [Freeloader() for _ in range(args.freeloader)] +
-        [Alternator() for _ in range(args.alternator)] +
-        [MaxRepHunter() for _ in range(args.mrp)] +
-        [Player() for _ in range(args.player)]
-        )
-        
+    add_player_group(bots, Pushover, args.pushover) 
+    add_player_group(bots, Freeloader, args.freeloader) 
+    add_player_group(bots, Alternator, args.alternator) 
+    add_player_group(bots, MaxRepHunter, args.mrp) 
+    add_player_group(bots, Player, args.player) 
 
-    for r in args.random:
-        (num, value) = r.split(",")
-        num = int(num)
-        value = float(value)
+    for x in args.random:
+        (number, p_hunt) = x.split(",")
+        number = int(number)
+        p_hunt = float(p_hunt)
+        do_log = int(do_log)
         
-        bots.extend([Random(value) for _ in range(num)])
+        bots.extend([Random(p_hunt, i, do_log) for i in range(number)])
 
 
     players = bots if bots else DEFAULT_PLAYERS       

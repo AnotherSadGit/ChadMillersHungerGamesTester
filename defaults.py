@@ -1,5 +1,7 @@
 '''Separate the default data from the application code.'''
 
+from __future__ import division, print_function
+
 from datetime import datetime
 
 from bots import *
