@@ -133,6 +133,7 @@ class Game(object):
                                 if opposing_info <> player_info]
             player_contests_choice_pairs = player_info[0]
             player_results = player_info[1]
+            total_food_earned = sum(player_results)
             p = player_info[2]
             
             outcomes = zip(opposing_players, player_contests_choice_pairs, player_results)            
@@ -146,8 +147,9 @@ class Game(object):
                 print ("    vs {0: <30} (rep at start of round: {1:.3f}): {2}  Food earned: {3}"
                        .format(outcome[0].player, outcome[0].prev_rep, 
                                outcome[1], outcome[2]))
-            
+            print ("    Total food earned in round: {0}".format(total_food_earned))
         
+
     def play_round(self):
         # Get beginning of round stats        
         self.round += 1
