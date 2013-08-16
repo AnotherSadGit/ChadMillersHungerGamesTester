@@ -157,7 +157,7 @@ class AverageHunter(BasePlayer):
 
 # Bots below added after forking Chad Miller's repo:
 
-class AntiSocial(BasePlayer):
+class BaseAntiSocial(BasePlayer):
     '''Base class for the AntiSocial players. Player will always slack against 
     an opponent with either a high probability of hunting or a low probability 
     of hunting.
@@ -166,7 +166,7 @@ class AntiSocial(BasePlayer):
     def __init__(self, antisocial_threshold, evil_threshold, random_threshold, 
                  id = None, do_logging = False):
 
-        super(AntiSocial, self).__init__(id, do_logging)
+        super(BaseAntiSocial, self).__init__(id, do_logging)
 
         assert antisocial_threshold >= 0.00 and antisocial_threshold <= 1.00, \
             "antisocial_threshold must be at least 0 and at most 1"
@@ -187,8 +187,11 @@ class AntiSocial(BasePlayer):
                     ):
 
         def single_hunt_choice(player_rep):
+
             if self.random_threshold == "reputation":
-                self.random_threshold = player_rep
+                random_threshold = player_rep
+            else: 
+                random_threshold = self.random_threshold
 
             if round_number == 1:
                 return 'h'
@@ -196,13 +199,13 @@ class AntiSocial(BasePlayer):
                 return 's'
             if player_rep < self.evil_threshold:
                 return 's'
-            if random.random() < self.random_threshold:
+            if random.random() < random_threshold:
                 return 'h'
             return 's'
 
         return [single_hunt_choice(player_rep) for player_rep in player_reputations]
 
-class RandomAntiSocial(AntiSocial):
+class RandomAntiSocial(BaseAntiSocial):
     '''Modified Random: Player that hunts with probability p_hunt and
     slacks with probability 1-p_hunt, as per Random.  However, player will 
     always slack against an opponent with either a high probability of hunting 
@@ -224,7 +227,7 @@ class RandomAntiSocial(AntiSocial):
                                                      antisocial_threshold, 
                                                      evil_threshold)
 
-class FairHunterAntiSocial(AntiSocial):
+class FairHunterAntiSocial(BaseAntiSocial):
     '''Modified FairHunter: Player that tries to be fair by hunting with same 
     probability as each opponent, as per FairHunter.  However, player will 
     always slack against an opponent with either a high probability of hunting 
