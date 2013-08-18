@@ -56,24 +56,66 @@ class BasePlayer(object):
 
 class Player(BasePlayer):
     '''
-    Your strategy starts here.
+    Cynical Nice Guy: This strategy can be summarized as:
+
+    1) In general, be a nice guy;
+    2) but don't be a mug; 
+    3) and take advantage of any easy marks you encounter.
+
+    In detail:
+    
+    1) In general, be a nice guy: Hunt with a probability of 0.8, randomized.
+
+    2) Don't be a mug: When up against a really evil competitor, with a really 
+    low reputation, stop being a nice guy.  Always slack against such an evil 
+    competitor.
+
+    3) Take advantage of any easy marks: If a competitor always hunts, 
+    then take advantage of them by slacking.
+
+    In addition, start off hunting on the first round so that other players 
+    will see a good reputation to start with, and won't punish this player in 
+    the early rounds for having a low reputation.
+
+    This strategy just plays to the prisoner's dilemma and ignores the public 
+    goods game where all players get a bonus if enough hunt during a round.  
+    Since bonuses are awarded to all players they benefit all players equally 
+    so they can be ignored for the purposes of the game.  The only benefit to 
+    playing to win a bonus would come after many rounds, when the player's food 
+    points are low.  Then gaining a bonus would be helpful to allow the player 
+    to live to fight another round.  However, increasing the probability of 
+    hunting might make the player more vulnerable to losing food points to 
+    slacker competitors.  Given that, and that simplicity when coding is next 
+    to Godliness, we'll ignore the public goods game.
     '''
     
     def __init__(self, id = None, do_logging = False):
-        super(Player, self).__init__(id, do_logging)
-        self.name = "Nasty"
+        self.name = "CynicalNiceGuy"
+        self.p_hunt = 0.8
+        self.antisocial_threshold = 0.9
+        self.evil_threshold = 0.03
 
-    def hunt_choices(
-                    self,
-                    round_number,
-                    current_food,
-                    current_reputation,
-                    m,
-                    player_reputations,
-                    ):
+        super(Player, self).__init__(self.name, id, do_logging)
+
+
+    def single_hunt_choice(self, round_number, player_rep):
+
+        if round_number == 1:
+            return 'h'
+        if player_rep >= self.antisocial_threshold:
+            return 's'
+        if player_rep < self.evil_threshold:
+            return 's'
+        if random.random() < self.p_hunt:
+            return 'h'
+        return 's'
+
+
+    def hunt_choices(self, round_number, current_food, current_reputation,
+                     m, player_reputations):
         '''Required function defined in the rules'''
-                    
-        return ['s']*len(player_reputations)
+        return [self.single_hunt_choice(round_number, player_rep) 
+                for player_rep in player_reputations]
         
 
     def hunt_outcomes(self, food_earnings):
