@@ -1,7 +1,8 @@
 from __future__ import division, print_function
 import random
 import sys
-import os
+import os, os.path
+from datetime import datetime
 
 from Player import Player
 
@@ -84,12 +85,14 @@ class Game(object):
         
         self.players = [GamePlayer(self,p,start_food) for p in players]
 
-        if log_filename is not None:
+        if self.log_filename is not None:
             self.orig_stdout = sys.stdout
+            filename, extension = os.path.splitext(self.log_filename)
+            filename = filename + "_{0:%Y%m%d_%H%M%S}".format(datetime.now()) + extension
             # Open as file object rather than opening it via io.open as a text 
             # stream: A file object takes strings while a text stream takes 
             # unicode.  Unicode causes a problem when writing players' details.
-            self.log_file = open(log_filename, "wt")
+            self.log_file = open(filename, "wt")
             sys.stdout = self.log_file
 
         if self.verbose:
