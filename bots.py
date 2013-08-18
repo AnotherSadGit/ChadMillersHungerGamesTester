@@ -5,9 +5,9 @@ class Pushover(BasePlayer):
     '''Player that always hunts.'''
 
     def __init__(self, id = None, do_logging = False):
-        super(Pushover, self).__init__(id, do_logging)
         self.name = "Pushover"
-    
+        super(Pushover, self).__init__(self.name, id, do_logging)
+        
     def hunt_choices(
                     self,
                     round_number,
@@ -23,8 +23,8 @@ class Freeloader(BasePlayer):
     '''Player that always slacks.'''
     
     def __init__(self, id = None, do_logging = False):
-        super(Freeloader, self).__init__(id, do_logging)
         self.name = "Freeloader"
+        super(Freeloader, self).__init__(self.name, id, do_logging)
     
     def hunt_choices(
                     self,
@@ -41,8 +41,8 @@ class Alternator(BasePlayer):
     '''Player that alternates between hunting and slacking.'''
 
     def __init__(self, id = None, do_logging = False):
-        super(Alternator, self).__init__(id, do_logging)
         self.name = "Alternator"
+        super(Alternator, self).__init__(self.name, id, do_logging)
         self.last_played = 's'
         
     def hunt_choices(
@@ -64,8 +64,8 @@ class MaxRepHunter(BasePlayer):
     '''Player that hunts only with people with max reputation.'''
 
     def __init__(self, id = None, do_logging = False):
-        super(MaxRepHunter, self).__init__(id, do_logging)
         self.name = "MaxRepHunter"
+        super(MaxRepHunter, self).__init__(self.name, id, do_logging)
 
     def hunt_choices(
                     self,
@@ -86,9 +86,9 @@ class Random(BasePlayer):
     '''
     
     def __init__(self, p_hunt, id = None, do_logging = False):
-        super(Random, self).__init__(id, do_logging)
-        assert p_hunt >= 0.00 and p_hunt <= 1.00, "p_hunt must be at least 0 and at most 1"
         self.name = "Random" + str(p_hunt)
+        super(Random, self).__init__(self.name, id, do_logging)
+        assert p_hunt >= 0.00 and p_hunt <= 1.00, "p_hunt must be at least 0 and at most 1"
         self.p_hunt = p_hunt
 
     def hunt_choices(
@@ -105,8 +105,8 @@ class FairHunter(BasePlayer):
     '''Player that tries to be fair by hunting with same probability as each opponent'''
 
     def __init__(self, id = None, do_logging = False):
-        super(FairHunter, self).__init__(id, do_logging)
         self.name = "FairHunter"
+        super(FairHunter, self).__init__(self.name, id, do_logging)
 
     def hunt_choices(
                 self,
@@ -122,8 +122,8 @@ class BoundedHunter(BasePlayer):
     '''Player that hunts whenever the other's reputation is within some range.'''
 
     def __init__(self, lower, upper, id = None, do_logging = False):
-        super(BoundedHunter, self).__init__(id, do_logging)
         self.name = "BoundedHunter" + str(lower)+'-'+str(upper)
+        super(BoundedHunter, self).__init__(self.name, id, do_logging)
         self.low = lower
         self.up = upper
 
@@ -141,8 +141,8 @@ class AverageHunter(BasePlayer):
     '''Player that tries to maintain the average reputation, but spreads its hunts randomly.'''
     
     def __init__(self, id = None, do_logging = False):
-        super(AverageHunter, self).__init__(id, do_logging)
         self.name = "AverageHunter"
+        super(AverageHunter, self).__init__(self.name, id, do_logging)
 
     def hunt_choices(
                     self,
@@ -154,92 +154,3 @@ class AverageHunter(BasePlayer):
                     ):
         avg_rep = sum(player_reputations) / float(len(player_reputations))
         return ['h' if random.random() < avg_rep else 's' for rep in player_reputations]
-
-# Bots below added after forking Chad Miller's repo:
-
-class BaseAntiSocial(BasePlayer):
-    '''Base class for the AntiSocial players. Player will always slack against 
-    an opponent with either a high probability of hunting or a low probability 
-    of hunting.
-    '''
-    
-    def __init__(self, antisocial_threshold, evil_threshold, random_threshold, 
-                 id = None, do_logging = False):
-
-        super(BaseAntiSocial, self).__init__(id, do_logging)
-
-        assert antisocial_threshold >= 0.00 and antisocial_threshold <= 1.00, \
-            "antisocial_threshold must be at least 0 and at most 1"
-        assert evil_threshold >= 0.00 and evil_threshold <= 1.00, \
-            "evil_threshold must be at least 0 and at most 1"
-
-        self.antisocial_threshold = antisocial_threshold
-        self.evil_threshold = evil_threshold
-        self.random_threshold = random_threshold
-
-    def hunt_choices(
-                    self,
-                    round_number,
-                    current_food,
-                    current_reputation,
-                    m,
-                    player_reputations,
-                    ):
-
-        def single_hunt_choice(player_rep):
-
-            if self.random_threshold == "reputation":
-                random_threshold = player_rep
-            else: 
-                random_threshold = self.random_threshold
-
-            if round_number == 1:
-                return 'h'
-            if player_rep >= self.antisocial_threshold:
-                return 's'
-            if player_rep < self.evil_threshold:
-                return 's'
-            if random.random() < random_threshold:
-                return 'h'
-            return 's'
-
-        return [single_hunt_choice(player_rep) for player_rep in player_reputations]
-
-class RandomAntiSocial(BaseAntiSocial):
-    '''Modified Random: Player that hunts with probability p_hunt and
-    slacks with probability 1-p_hunt, as per Random.  However, player will 
-    always slack against an opponent with either a high probability of hunting 
-    or a low probability of hunting.
-    '''
-    
-    def __init__(self, p_hunt, antisocial_threshold, evil_threshold, 
-                 id = None, do_logging = False):
-
-        super(RandomAntiSocial, self).__init__(antisocial_threshold, 
-                                               evil_threshold, p_hunt, 
-                                               id, do_logging)
-
-        assert p_hunt >= 0.00 and p_hunt <= 1.00, \
-            "p_hunt must be at least 0 and at most 1"
-
-        self.name = "RandomAntiSocial{0}_{1}_{2}".format(
-                                                     p_hunt, 
-                                                     antisocial_threshold, 
-                                                     evil_threshold)
-
-class FairHunterAntiSocial(BaseAntiSocial):
-    '''Modified FairHunter: Player that tries to be fair by hunting with same 
-    probability as each opponent, as per FairHunter.  However, player will 
-    always slack against an opponent with either a high probability of hunting 
-    or a low probability of hunting.'''
-
-    def __init__(self, antisocial_threshold, evil_threshold, 
-                 id = None, do_logging = False):
-
-        super(FairHunterAntiSocial, self).__init__(antisocial_threshold, 
-                                                   evil_threshold, "reputation", 
-                                                   id, do_logging)
-
-        self.name = "FairHunterAntiSocial{0}_{1}".format(
-                                                     antisocial_threshold, 
-                                                     evil_threshold)

@@ -7,6 +7,8 @@ from defaults import DEFAULT_VERBOSITY, DEFAULT_MIN_ROUNDS, \
 from bots import *
 from Player import Player
 from ThresholdPlayers import FixedThreshold
+from AntiSocialPlayers import RandomAntiSocial, FairHunterAntiSocial
+from DetectivePlayers import RandomAntiSocialGTFT, RandomAntiSocialPavlov2
 
 def add_player_group(player_list, player_class, argument_values):
     for x in argument_values:
@@ -143,6 +145,26 @@ def get_arguments():
                             "antisocial_threshold and evil_threshold " \
                             "are floats in the range 0-1, " \
                             "and do_log is 0 or 1.")
+    bot_options.add_argument("-rgt", "--random-antisocial-gtft", dest="random_antisocial_gtft",
+                        default=[], nargs="*",
+                        help="the number and probabilities of RandomAntiSocialGTFT bots to play " \
+                            "with, and whether they require detailed " \
+                            "logging or not, in the form  " \
+                            "'number,p_hunt,antisocial_threshold,evil_threshold,p_generosity,do_log' " \
+                            "where number is an int, " \
+                            "p_hunt, antisocial_threshold, evil_threshold " \
+                            "and p_generosity are floats in the range 0-1, " \
+                            "and do_log is 0 or 1.")
+    bot_options.add_argument("-rpv", "--random-antisocial-pavlov", dest="random_antisocial_pavlov",
+                        default=[], nargs="*",
+                        help="the number and probabilities of RandomAntiSocialPavlov2 bots to play " \
+                            "with, and whether they require detailed " \
+                            "logging or not, in the form  " \
+                            "'number,p_hunt,antisocial_threshold,evil_threshold,do_log' " \
+                            "where number is an int, " \
+                            "p_hunt, antisocial_threshold and evil_threshold " \
+                            "are floats in the range 0-1, " \
+                            "and do_log is 0 or 1.")
     
     args = parser.parse_args()
 
@@ -236,6 +258,45 @@ def get_arguments():
         else:
             bots.extend([FairHunterAntiSocial(antisocial_threshold, 
                                           evil_threshold, i, do_log) for i in range(number)])
+
+    for x in args.random_antisocial_gtft:
+        (number, p_hunt, antisocial_threshold, evil_threshold, p_generosity, do_log) = x.split(",")
+        number = int(number)
+        p_hunt = float(p_hunt)
+        antisocial_threshold = float(antisocial_threshold)
+        evil_threshold = float(evil_threshold)
+        p_generosity = float(p_generosity)
+        do_log = int(do_log)
+        
+        if number <= 0:
+            continue
+        elif number == 1:
+            bots.append(RandomAntiSocialGTFT(p_hunt, antisocial_threshold, 
+                                         evil_threshold, p_generosity, 
+                                         None, do_log))
+        else:
+            bots.extend([RandomAntiSocialGTFT(p_hunt, antisocial_threshold, 
+                                          evil_threshold, p_generosity, 
+                                          i, do_log) for i in range(number)])
+
+    for x in args.random_antisocial_pavlov:
+        (number, p_hunt, antisocial_threshold, evil_threshold, do_log) = x.split(",")
+        number = int(number)
+        p_hunt = float(p_hunt)
+        antisocial_threshold = float(antisocial_threshold)
+        evil_threshold = float(evil_threshold)
+        do_log = int(do_log)
+        
+        if number <= 0:
+            continue
+        elif number == 1:
+            bots.append(RandomAntiSocialPavlov2(p_hunt, antisocial_threshold, 
+                                         evil_threshold, 
+                                         None, do_log))
+        else:
+            bots.extend([RandomAntiSocialPavlov2(p_hunt, antisocial_threshold, 
+                                          evil_threshold, 
+                                          i, do_log) for i in range(number)])
         
     players = bots if bots else DEFAULT_PLAYERS       
         

@@ -22,10 +22,11 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AntiSocialPlayers.py" />
     <Compile Include="app.py" />
     <Compile Include="arguments.py" />
     <Compile Include="bots.py" />
-    <Compile Include="DectectivePlayers.py" />
+    <Compile Include="DetectivePlayers.py" />
     <Compile Include="defaults.py" />
     <Compile Include="Game.py" />
     <Compile Include="Player.py" />

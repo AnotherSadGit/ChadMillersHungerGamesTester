@@ -5,6 +5,7 @@ from __future__ import division, print_function
 from bots import *
 from Player import Player
 from ThresholdPlayers import FixedThreshold
+from DetectivePlayers import RandomAntiSocialGTFT
 
 # Change these to edit the default Game parameters
 DEFAULT_VERBOSITY = True
@@ -18,4 +19,5 @@ DEFAULT_PLAYERS = [Player(), Pushover(), Freeloader(), Alternator(),
                    Random(.2), Random(.8), BoundedHunter(0.7, 1.0), 
                    FixedThreshold(0.5, 'h'), FixedThreshold(0.5, 's'), 
                    FixedThreshold(0.45, 'h'), FixedThreshold(0.45, 's'), 
-                   FixedThreshold(0.55, 'h'), FixedThreshold(0.55, 's')]
+                   FixedThreshold(0.55, 'h'), FixedThreshold(0.55, 's'), 
+                   RandomAntiSocialGTFT(0.8, 0.9, 0.03, 0.05)]

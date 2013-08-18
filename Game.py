@@ -3,6 +3,7 @@ import random
 import sys
 import os, os.path
 from datetime import datetime
+from DetectivePlayers import BaseDetective
 
 from Player import Player
 
@@ -169,12 +170,18 @@ class Game(object):
         
         # Get player strategies
         strategies = []
+        players_uids = [gameplayer.player.uid for gameplayer in self.players]
         for i,p in enumerate(self.players):
             opp_reputations = reputations[:i]+reputations[i+1:]
             # Save the player's rep from the previous round.
             p.prev_rep = p.rep
-            strategy = p.player.hunt_choices(self.round, p.food, p.rep, m, opp_reputations)
-
+            if isinstance(p.player, BaseDetective):
+                strategy = p.player.hunt_choices(self.round, p.food, p.rep, m, 
+                                                 opp_reputations, players_uids)
+            else:
+                strategy = p.player.hunt_choices(self.round, p.food, p.rep, m, 
+                                                 opp_reputations)
+            
             # Insert a dummy choice for the player playing themselves.  Makes it 
             # easier to pair up this player's choice against another player with 
             # that player's choice against this one.
